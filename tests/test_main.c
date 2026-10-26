@@ -16,6 +16,7 @@
 #define MAX_DEVICES 8
 #define RTX_3090 0x2204
 #define RTX_3070 0x2484
+#define RTX_3080TI_LAPTOP 0x2460
 #define RTX_A2000 0x2531 /* GA106 professional: not supported */
 
 static struct pci_dev devices[MAX_DEVICES];
@@ -297,6 +298,13 @@ int main(void)
 	assert(fake.loads == 1 && fake.load_dev == &devices[1] && fake.releases == 1);
 	assert(!logged("no supported card"));
 	puts("list: only listed cards, concurrently PASS");
+
+	/* GA103 mobile: the RTX 3080 Ti Laptop 16 GB (0x2460) is accepted. */
+	reset("0000:51:00.0");
+	add("0000:51:00.0", RTX_3080TI_LAPTOP, false);
+	run();
+	assert(fake.loads == 1 && fake.started == 1 && fake.unlocks[0]);
+	puts("GA103 mobile 0x2460: accepted PASS");
 
 	/* One card failing leaves the others unlocked. */
 	reset("all");
